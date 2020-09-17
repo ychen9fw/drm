@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
 
-public class MakeSignature {
+public class RequestDRM {
     static String path = "/drmproxy/v2/getLicense";
     static String xappid = "TestForDeveloper";
     static String xtimestamp = Long.toString(new Date().getTime());
@@ -45,8 +45,8 @@ public class MakeSignature {
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-//                    .uri(URI.create("HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense"))
-                    .uri(URI.create("https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense"))
+                    .uri(URI.create("HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense"))
+//                    .uri(URI.create("https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense"))
                     .timeout(Duration.ofMinutes(2))
                     .header("Content-Type", "application/json")
 //                    .header("x-appId", "")
@@ -67,6 +67,6 @@ public class MakeSignature {
         System.out.println("end");
     }
 
-    public MakeSignature() throws UnsupportedEncodingException {
+    public RequestDRM() throws UnsupportedEncodingException {
     }
 }
