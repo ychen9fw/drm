@@ -45,13 +45,15 @@ public class MakeSignature {
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense"))
+//                    .uri(URI.create("HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense"))
+                    .uri(URI.create("https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense"))
                     .timeout(Duration.ofMinutes(2))
                     .header("Content-Type", "application/json")
+//                    .header("x-appId", "")
                     .header("x-appId", xappid)
                     .header("x-timeStamp", xtimestamp)
                     .header("x-sign", encryptedWord)
-    //                .POST(HttpRequest.BodyPublishers.ofString(""))
+//                    .POST(HttpRequest.BodyPublishers.ofString("{}"))
                     .POST(HttpRequest.BodyPublishers.ofString(postbody))
                     .build();
             System.out.println(request.headers());
