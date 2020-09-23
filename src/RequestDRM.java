@@ -19,32 +19,32 @@ import java.util.Date;
 import static sun.security.jca.JCAUtil.getSecureRandom;
 
 public class RequestDRM {
+    static final String AES = "QoHOSmSPUH1uGPr/lsxWb+1Mslu7cnJ9+tvPmNfEyJs=";
+    static final String XAPPID = "736430079244616618";
+    static final byte[] IV = buildRandomBytes(16);
+    static final byte[] CONTENTKEY = buildRandomBytes(32);
+    static final String SIGN_KEY = "NuNo4KniGniwrTZjs5fQcHeRCQsJ61H84UXUdaiLzIY=";
 
     public static void main(String[] args) throws Exception {
-
-        String AES = "QoHOSmSPUH1uGPr/lsxWb+1Mslu7cnJ9+tvPmNfEyJs=";
-
         String path = "/drmproxy/v2/getLicense";
-        String xappid = "736430079244616618";
         String xtimestamp = Long.toString(new Date().getTime());
         String begin = Long.toString(new Date().getTime()/1000);
         String expire = Long.toString(new Date().getTime()/1000 + 86400);
-        byte[] IV = buildRandomBytes(16);
-        byte[] contentkey = buildRandomBytes(32);
-        byte[] key = doCipher(1, contentkey, Base64.getDecoder().decode(AES), IV);
+        byte[] key = doCipher(1, CONTENTKEY, Base64.getDecoder().decode(AES), IV);
         String keyString = Base64.getEncoder().encodeToString(key);
-
         String IVString = Base64.getEncoder().encodeToString(IV);
-        String postbody = "{\"type\": \"licenseRequestExt\",\"payload\": \"abcd=\"," +
+        String payload = "abcde=";
+        String postbody = "{\"type\": \"licenseRequestExt\",\"payload\": \"" +
+                payload +
+                "\"," +
                 "\"authorizeInfo\": {\"keyAndPolicy\": [{\"distributionMode\": \"VOD\",\"keyInfo\": {\"keyId\": \"aa0f3f578a7d4a04a7cd6d4d27f33799\",\"key\": \"" +
                 keyString +
                 "\",\"keyEncryptedIV\": \"" +
                 IVString +
                 "\"},\"contentPolicy\": {\"securityLevel\": \"1\",\"outputControl\": \"0\",\"licenseType\": \"NONPERSISTENT\"},\"userPolicy\": {\"beginDate\": \"" + begin + "\",\"expirationDate\": \"" + expire + "\"}}],\"contentid\": \"VUxBKvxJU0ORfr6zCn32ew==\",\"resultCode\": \"success\"}}";
-        String signKey = "NuNo4KniGniwrTZjs5fQcHeRCQsJ61H84UXUdaiLzIY=";
-        String originalWord = path+xappid+xtimestamp+postbody;
+        String originalWord = path+ XAPPID +xtimestamp+postbody;
         byte[] encryptedWordBytes;
-        byte[] secretBytes = Base64.getDecoder().decode(signKey);
+        byte[] secretBytes = Base64.getDecoder().decode(SIGN_KEY);
         byte[] originalWordBytes = originalWord.getBytes(StandardCharsets.UTF_8);
 
         System.out.println(postbody);
@@ -64,7 +64,7 @@ public class RequestDRM {
             System.out.println("keystring " + keyString);
             System.out.println("AES " +AES);
             System.out.println("IV " +IVString);
-            System.out.println("sign key " +signKey);
+            System.out.println("sign key " + SIGN_KEY);
 
 
 
@@ -78,7 +78,7 @@ public class RequestDRM {
                     .timeout(Duration.ofMinutes(2))
                     .header("Content-Type", "application/json")
 //                    .header("x-appId", "")
-                    .header("x-appId", xappid)
+                    .header("x-appId", XAPPID)
                     .header("x-timeStamp", xtimestamp)
                     .header("x-sign", encryptedWord)
 //                    .POST(HttpRequest.BodyPublishers.ofString("{}"))
