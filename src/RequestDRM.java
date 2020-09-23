@@ -36,11 +36,11 @@ public class RequestDRM {
 
         String IVString = Base64.getEncoder().encodeToString(IV);
         String postbody = "{\"type\": \"licenseRequestExt\",\"payload\": \"abcd=\"," +
-                "\"authorizeInfo\": [{\"keyAndPolicy\": [{\"distributionMode\": \"VOD\",\"keyInfo\": [{\"keyId\": \"aa0f3f578a7d4a04a7cd6d4d27f33799\",\"key\": \"" +
+                "\"authorizeInfo\": {\"keyAndPolicy\": [{\"distributionMode\": \"VOD\",\"keyInfo\": {\"keyId\": \"aa0f3f578a7d4a04a7cd6d4d27f33799\",\"key\": \"" +
                 keyString +
                 "\",\"keyEncryptedIV\": \"" +
                 IVString +
-                "\"}],\"contentPolicy\": [{\"securityLevel\": \"1\",\"outputControl\": \"0\",\"licenseType\": \"NONPERSISTENT\"}],\"userPolicy\": [{\"beginDate\": \"" + begin + "\",\"expirationDate\": \"" + expire + "\"}]}],\"contentid\": \"VUxBKvxJU0ORfr6zCn32ew==\",\"resultCode\": \"success\"}]}";
+                "\"},\"contentPolicy\": {\"securityLevel\": \"1\",\"outputControl\": \"0\",\"licenseType\": \"NONPERSISTENT\"},\"userPolicy\": {\"beginDate\": \"" + begin + "\",\"expirationDate\": \"" + expire + "\"}}],\"contentid\": \"VUxBKvxJU0ORfr6zCn32ew==\",\"resultCode\": \"success\"}}";
         String signKey = "NuNo4KniGniwrTZjs5fQcHeRCQsJ61H84UXUdaiLzIY=";
         String originalWord = path+xappid+xtimestamp+postbody;
         byte[] encryptedWordBytes;
