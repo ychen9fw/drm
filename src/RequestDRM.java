@@ -19,17 +19,19 @@ import java.util.Date;
 import static sun.security.jca.JCAUtil.getSecureRandom;
 
 public class RequestDRM {
-    static final String AES = "QoHOSmSPUH1uGPr/lsxWb+1Mslu7cnJ9+tvPmNfEyJs=";
-    static final String XAPPID = "736430079244616618";
     static final byte[] IV = buildRandomBytes(16);
     static final byte[] CONTENTKEY = buildRandomBytes(32);
-    static final String SIGN_KEY = "NuNo4KniGniwrTZjs5fQcHeRCQsJ61H84UXUdaiLzIY=";
 
-    static final String TEST_URL = "https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense";
-    static final String TEST_ID = "TestForDeveloper";
-    static final String TEST_SIGN_KEY = "VAv4XeXRNpmZEwJYQ878J5lNCbmxZpxwU2z57wmbYnA=";
+//    static final String URL = "HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense";
+//    static final String AES = "QoHOSmSPUH1uGPr/lsxWb+1Mslu7cnJ9+tvPmNfEyJs=";
+//    static final String XAPPID = "736430079244616618";
+//    static final String SIGN_KEY = "NuNo4KniGniwrTZjs5fQcHeRCQsJ61H84UXUdaiLzIY=";
 
-    public static final String URL = "HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense";
+    static final String URL = "https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense";
+    static final String AES = "GujM0OeYXMC2IDpVhVoQNK/CUpgOlwypDlICaJ+Uerk=";
+    static final String XAPPID = "TestForDeveloper";
+    static final String SIGN_KEY = "VAv4XeXRNpmZEwJYQ878J5lNCbmxZpxwU2z57wmbYnA=";
+
 
 
     public static void main(String[] args) throws Exception {
