@@ -25,6 +25,13 @@ public class RequestDRM {
     static final byte[] CONTENTKEY = buildRandomBytes(32);
     static final String SIGN_KEY = "NuNo4KniGniwrTZjs5fQcHeRCQsJ61H84UXUdaiLzIY=";
 
+    static final String TEST_URL = "https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense";
+    static final String TEST_ID = "TestForDeveloper";
+    static final String TEST_SIGN_KEY = "VAv4XeXRNpmZEwJYQ878J5lNCbmxZpxwU2z57wmbYnA=";
+
+    public static final String URL = "HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense";
+
+
     public static void main(String[] args) throws Exception {
         String path = "/drmproxy/v2/getLicense";
         String xtimestamp = Long.toString(new Date().getTime());
@@ -73,7 +80,7 @@ public class RequestDRM {
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense"))
+                    .uri(URI.create(URL))
 //                    .uri(URI.create("https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense"))
                     .timeout(Duration.ofMinutes(2))
                     .header("Content-Type", "application/json")
