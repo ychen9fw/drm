@@ -17,7 +17,10 @@ public class Handler implements RequestHandler<Map<String,String>, String>{
         LambdaLogger logger = context.getLogger();
         String response = new String("200 OK");
         // process event
-        logger.log("EVENT: " + gson.toJson(event));
+//        logger.log("EVENT: " + gson.toJson(event));
+        event.entrySet().forEach(entry->{
+            logger.log(entry.getKey() + " " + entry.getValue());
+        });
         return response;
     }
 }
