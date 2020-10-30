@@ -9,45 +9,127 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Duration;
+import java.util.*;
+
+import static drm.RequestDRM.doCipher;
+import static drm.RequestDRM.hexStringToByteArray;
 
 // drm.Handler value: example.drm.Handler
 public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//    @Override
-//    public String handleRequest(Map<String,String> event, Context context)
-//    {
-//        LambdaLogger logger = context.getLogger();
-//        String response = new String("200 OK");
-//        // process event
-////        logger.log("EVENT: " + gson.toJson(event));
-//        event.entrySet().forEach(entry->{
-//            logger.log(entry.getKey() + " " + entry.getValue());
-//        });
-//        return response;
-//    }
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent apiGatewayProxyRequestEvent, Context context) {
+        final String URL = "https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense";
+        final String AES = "GujM0OeYXMC2IDpVhVoQNK/CUpgOlwypDlICaJ+Uerk=";
+        final String XAPPID = "TestForDeveloper";
+        final String SIGN_KEY = "VAv4XeXRNpmZEwJYQ878J5lNCbmxZpxwU2z57wmbYnA=";
+        String id = "1";
+        byte[] IV = null;
+        byte[] CONTENTKEY = null;
 
         APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent();
         try {
             String requestString = apiGatewayProxyRequestEvent.getBody();
-            System.out.println(requestString);
-            String requestMessage = null;
-            String responseMessage = null;
-            if (requestString != null) {
-                JsonParser parser = new JsonParser();
-                JsonObject requestJsonObject = (JsonObject) parser.parse(requestString);
-                if (requestJsonObject != null) {
-                    if (requestJsonObject.get("requestMessage") != null) {
-                        requestMessage = requestJsonObject.get("requestMessage").toString();
-                    }
-                }
-            }
-            Map<String, String> responseBody = new HashMap<String, String>();
-            responseBody.put("responseMessage", requestMessage);
+            System.out.println("body " + requestString);
 
+            Map<String, String> reqHeaders = apiGatewayProxyRequestEvent.getQueryStringParameters();
+            if (reqHeaders.get("id") != null) {
+                id = reqHeaders.get("id");
+            }
+            switch (id) {
+                case "1":
+                    IV = Base64.getDecoder().decode("wuK1dCnuvE+gDRoWOkLKmQ==");
+                    CONTENTKEY = hexStringToByteArray("9747E321569144477B7705C7DAE3024D");
+                    break;
+                case "2":
+                    IV = Base64.getDecoder().decode("wuK1dCnuvE+gDRoWOkLKmQ==");
+                    CONTENTKEY = hexStringToByteArray("1234");
+                    break;
+                default:
+                    break;
+            }
+
+            String path = "/drmproxy/v2/getLicense";
+            String xtimestamp = Long.toString(new Date().getTime());
+            String begin = Long.toString(new Date().getTime()/1000);
+            String expire = Long.toString(new Date().getTime()/1000 + 86400);
+            byte[] key = doCipher(1, CONTENTKEY, Base64.getDecoder().decode(AES), IV);
+
+            String keyString = Base64.getEncoder().encodeToString(key);
+            String IVString = Base64.getEncoder().encodeToString(IV);
+            String payload = Base64.getEncoder().encodeToString(requestString.getBytes());
+            String postbody = "{\"type\": \"licenseRequestExt\",\"payload\": \"" +
+                    payload +
+                    "\"," +
+                    "\"authorizeInfo\": {\"keyAndPolicy\": [{\"distributionMode\": \"VOD\",\"keyInfo\": {\"keyId\": \"aa0f3f578a7d4a04a7cd6d4d27f33799\",\"key\": \"" +
+                    keyString +
+                    "\",\"keyEncryptedIV\": \"" +
+                    IVString +
+                    "\"},\"contentPolicy\": {\"securityLevel\": \"1\",\"outputControl\": \"0\",\"licenseType\": \"NONPERSISTENT\"},\"userPolicy\": {\"beginDate\": \"" + begin + "\",\"expirationDate\": \"" + expire + "\"}}],\"contentid\": \"VUxBKvxJU0ORfr6zCn32ew==\",\"resultCode\": \"success\"}}";
+            String originalWord = path+ XAPPID +xtimestamp+postbody;
+            byte[] encryptedWordBytes;
+            byte[] secretBytes = Base64.getDecoder().decode(SIGN_KEY);
+            byte[] originalWordBytes = originalWord.getBytes(StandardCharsets.UTF_8);
+
+            System.out.println(postbody);
+            // Initialize the MAC object.
+            Mac mac = Mac.getInstance("HmacSHA256");
+            // Define the key.
+            SecretKey secretKey = new SecretKeySpec(secretBytes, "HmacSHA256");
+            // Initialize the key.
+            mac.init(secretKey);
+            // Perform encryption.
+            encryptedWordBytes = mac.doFinal(originalWordBytes);
+            // Use Base64 to encode bytes.
+            String encryptedWord = Base64.getEncoder().encodeToString(encryptedWordBytes);
+
+            System.out.println("key " + Arrays.toString(key));
+            System.out.println("keystring " + keyString);
+            System.out.println("AES " +AES);
+            System.out.println("IV BASE64 " +IVString);
+            System.out.println("sign key " + SIGN_KEY);
+            System.out.println(encryptedWord);
+            System.out.println(xtimestamp);
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(URL))
+                    .timeout(Duration.ofMinutes(2))
+                    .header("Content-Type", "application/json")
+                    .header("x-appId", XAPPID)
+                    .header("x-timeStamp", xtimestamp)
+                    .header("x-sign", encryptedWord)
+                    .POST(HttpRequest.BodyPublishers.ofString(postbody))
+                    .build();
+            System.out.println(request.headers());
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.statusCode());
+            System.out.println(response.body());
+            //response.json.body. return to client
+
+//            String requestMessage = null;
+//                JsonParser parser = new JsonParser();
+//                JsonObject resJSON = (JsonObject) parser.parse(response.body());
+//                if (resJSON != null) {
+//                    if (resJSON.get("requestMessage") != null) {
+//                        requestMessage = resJSON.get("requestMessage").toString();
+//                    }
+//                }
+//            Map<String, String> responseBody = new HashMap<String, String>();
+//            responseBody.put("responseMessage", requestMessage);
+            apiGatewayProxyResponseEvent.setStatusCode(200);
+            apiGatewayProxyResponseEvent.setBody(response.body());
+            System.out.println("complete");
         } catch (Exception e) {
             e.printStackTrace();
         }
