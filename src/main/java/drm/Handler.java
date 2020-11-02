@@ -35,6 +35,7 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
         String id = "1";
         byte[] IV = null;
         byte[] CONTENTKEY = null;
+        String keyid = "";
 
         APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent();
         try {
@@ -48,11 +49,14 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
             switch (id) {
                 case "1":
                     IV = Base64.getDecoder().decode("wuK1dCnuvE+gDRoWOkLKmQ==");
-                    CONTENTKEY = hexStringToByteArray("9747E321569144477B7705C7DAE3024D");
+                    CONTENTKEY = hexStringToByteArray("3c2649fb74311591ca066c9888d890a2");
+                    keyid = "8e3092475d0e434f94dbf108e334536d";
+
                     break;
                 case "2":
                     IV = Base64.getDecoder().decode("wuK1dCnuvE+gDRoWOkLKmQ==");
                     CONTENTKEY = hexStringToByteArray("1234");
+                    keyid = "1234";
                     break;
                 default:
                     break;
@@ -70,11 +74,11 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
             String postbody = "{\"type\": \"licenseRequestExt\",\"payload\": \"" +
                     payload +
                     "\"," +
-                    "\"authorizeInfo\": {\"keyAndPolicy\": [{\"distributionMode\": \"VOD\",\"keyInfo\": {\"keyId\": \"aa0f3f578a7d4a04a7cd6d4d27f33799\",\"key\": \"" +
+                    "\"authorizeInfo\": {\"keyAndPolicy\": [{\"distributionMode\": \"VOD\",\"keyInfo\": {\"keyId\": \"" + keyid + "\",\"key\": \"" +
                     keyString +
                     "\",\"keyEncryptedIV\": \"" +
                     IVString +
-                    "\"},\"contentPolicy\": {\"securityLevel\": \"1\",\"outputControl\": \"0\",\"licenseType\": \"NONPERSISTENT\"},\"userPolicy\": {\"beginDate\": \"" + begin + "\",\"expirationDate\": \"" + expire + "\"}}],\"contentid\": \"VUxBKvxJU0ORfr6zCn32ew==\",\"resultCode\": \"success\"}}";
+                    "\"},\"contentPolicy\": {\"securityLevel\": \"1\",\"outputControl\": \"0\",\"licenseType\": \"NONPERSISTENT\"},\"userPolicy\": {\"beginDate\": \"" + begin + "\",\"expirationDate\": \"" + expire + "\"}}], \"resultCode\": \"success\"}}";
             String originalWord = path+ XAPPID +xtimestamp+postbody;
             byte[] encryptedWordBytes;
             byte[] secretBytes = Base64.getDecoder().decode(SIGN_KEY);
@@ -117,16 +121,6 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
             System.out.println(response.body());
             //response.json.body. return to client
 
-//            String requestMessage = null;
-//                JsonParser parser = new JsonParser();
-//                JsonObject resJSON = (JsonObject) parser.parse(response.body());
-//                if (resJSON != null) {
-//                    if (resJSON.get("requestMessage") != null) {
-//                        requestMessage = resJSON.get("requestMessage").toString();
-//                    }
-//                }
-//            Map<String, String> responseBody = new HashMap<String, String>();
-//            responseBody.put("responseMessage", requestMessage);
             apiGatewayProxyResponseEvent.setStatusCode(200);
             apiGatewayProxyResponseEvent.setBody(response.body());
             System.out.println("complete");
