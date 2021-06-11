@@ -44,7 +44,7 @@ public class Handler3 implements RequestHandler<APIGatewayProxyRequestEvent, API
             System.out.println("body " + requestString);
 
             Map<String, String> reqHeaders = apiGatewayProxyRequestEvent.getQueryStringParameters();
-            if (reqHeaders.get("id") != null) {
+            if (reqHeaders != null && reqHeaders.get("id") != null) {
                 id = reqHeaders.get("id");
             }
             switch (id) {
