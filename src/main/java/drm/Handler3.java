@@ -41,6 +41,9 @@ public class Handler3 implements RequestHandler<APIGatewayProxyRequestEvent, API
         APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent();
         try {
             String requestString = apiGatewayProxyRequestEvent.getBody();
+            if (requestString == null) {
+                requestString = "";
+            }
             System.out.println("body " + requestString);
 
             Map<String, String> reqHeaders = apiGatewayProxyRequestEvent.getQueryStringParameters();
@@ -63,7 +66,7 @@ public class Handler3 implements RequestHandler<APIGatewayProxyRequestEvent, API
                     break;
             }
 
-            String path = "/drmproxy/v2/getLicense";
+            String path = "/drmproxy/v3/getLicense";
             String xtimestamp = Long.toString(new Date().getTime());
             String begin = Long.toString(new Date().getTime()/1000);
             String expire = Long.toString(new Date().getTime()/1000 + 86400);
