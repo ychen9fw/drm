@@ -40,10 +40,13 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
         APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent();
         try {
             String requestString = apiGatewayProxyRequestEvent.getBody();
+            if (requestString == null) {
+                requestString = "";
+            }
             System.out.println("body " + requestString);
 
             Map<String, String> reqHeaders = apiGatewayProxyRequestEvent.getQueryStringParameters();
-            if (reqHeaders.get("id") != null) {
+            if (reqHeaders != null && reqHeaders.get("id") != null) {
                 id = reqHeaders.get("id");
             }
             switch (id) {
