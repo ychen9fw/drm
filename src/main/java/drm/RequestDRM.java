@@ -28,19 +28,25 @@ public class RequestDRM {
 //    static final byte[] CONTENTKEY = hexStringToByteArray("8aa08e0981a74f1fa26ecc34285edc0a");//buildRandomBytes(32);
 
 //    static final String URL = "HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense";
-//    static final String AES = "QoHOSmSPUH1uGPr/lsxWb+1Mslu7cnJ9+tvPmNfEyJs=";
+    static final String AES = "QoHOSmSPUH1uGPr/lsxWb+1Mslu7cnJ9+tvPmNfEyJs=";
 //    static final String XAPPID = "736430079244616618";
-//    static final String SIGN_KEY = "NuNo4KniGniwrTZjs5fQcHeRCQsJ61H84UXUdaiLzIY=";
+//    static final String XPORTALID = "";
+    static final String SIGN_KEY = "NuNo4KniGniwrTZjs5fQcHeRCQsJ61H84UXUdaiLzIY=";
 
-    static final String URL = "https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense";
-    static final String AES = "GujM0OeYXMC2IDpVhVoQNK/CUpgOlwypDlICaJ+Uerk=";
-    static final String XAPPID = "TestForDeveloper";
-    static final String SIGN_KEY = "VAv4XeXRNpmZEwJYQ878J5lNCbmxZpxwU2z57wmbYnA=";
+    static final String URL = "HTTPS://wiseplay.cloud.huawei.com/drmproxy/v3/getLicense";
+    static final String XPORTALID = "736430079244616618";
+    static final String XAPPID = "102808471";
+
+//    static final String URL = "https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense";
+//    static final String AES = "GujM0OeYXMC2IDpVhVoQNK/CUpgOlwypDlICaJ+Uerk=";
+//    static final String XAPPID = "TestForDeveloper";
+//    static final String SIGN_KEY = "VAv4XeXRNpmZEwJYQ878J5lNCbmxZpxwU2z57wmbYnA=";
 
 
     public static void main(String[] args) throws Exception {
         //receive "payload" from client
-        String path = "/drmproxy/v2/getLicense";
+//        String path = "/drmproxy/v2/getLicense";
+        String path = "/drmproxy/v3/getLicense";
         String xtimestamp = Long.toString(new Date().getTime());
         String begin = Long.toString(new Date().getTime()/1000);
         String expire = Long.toString(new Date().getTime()/1000 + 86400);
@@ -57,7 +63,7 @@ public class RequestDRM {
                 "\",\"keyEncryptedIV\": \"" +
                 IVString +
                 "\"},\"contentPolicy\": {\"securityLevel\": \"1\",\"outputControl\": \"0\",\"licenseType\": \"NONPERSISTENT\"},\"userPolicy\": {\"beginDate\": \"" + begin + "\",\"expirationDate\": \"" + expire + "\"}}],\"contentid\": \"VUxBKvxJU0ORfr6zCn32ew==\",\"resultCode\": \"success\"}}";
-        String originalWord = path+ XAPPID +xtimestamp+postbody;
+        String originalWord = path + XAPPID + XPORTALID + xtimestamp+postbody;
         byte[] encryptedWordBytes;
         byte[] secretBytes = Base64.getDecoder().decode(SIGN_KEY);
         byte[] originalWordBytes = originalWord.getBytes(StandardCharsets.UTF_8);
@@ -94,6 +100,7 @@ public class RequestDRM {
                     .header("Content-Type", "application/json")
 //                    .header("x-appId", "")
                     .header("x-appId", XAPPID)
+                    .header("x-portalId", XPORTALID)
                     .header("x-timeStamp", xtimestamp)
                     .header("x-sign", encryptedWord)
 //                    .POST(HttpRequest.BodyPublishers.ofString("{}"))
