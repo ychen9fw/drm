@@ -1,10 +1,13 @@
 package drm;
 
+import com.amazonaws.services.lambda.runtime.events.CloudFrontEvent;
+
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.awt.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -18,7 +21,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Random;
-
+import okhttp3.*;
+import okhttp3.logging.HttpLoggingInterceptor;
 //import static sun.security.jca.JCAUtil.getSecureRandom;
 
 public class RequestDRM {
@@ -27,15 +31,15 @@ public class RequestDRM {
     static final byte[] CONTENTKEY = hexStringToByteArray("9747E321569144477B7705C7DAE3024D");//buildRandomBytes(32);
 //    static final byte[] CONTENTKEY = hexStringToByteArray("8aa08e0981a74f1fa26ecc34285edc0a");//buildRandomBytes(32);
 
-//    static final String URL = "HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense";
+    static final String URL = "HTTPS://wiseplay.cloud.huawei.com/drmproxy/v2/getLicense";
     static final String AES = "QoHOSmSPUH1uGPr/lsxWb+1Mslu7cnJ9+tvPmNfEyJs=";
-//    static final String XAPPID = "736430079244616618";
-//    static final String XPORTALID = "";
+    static final String XAPPID = "736430079244616618";
+    static final String XPORTALID = "";
     static final String SIGN_KEY = "NuNo4KniGniwrTZjs5fQcHeRCQsJ61H84UXUdaiLzIY=";
 
-    static final String URL = "HTTPS://wiseplay.cloud.huawei.com/drmproxy/v3/getLicense";
-    static final String XPORTALID = "736430079244616618";
-    static final String XAPPID = "102808471";
+//    static final String URL = "HTTPS://wiseplay.cloud.huawei.com/drmproxy/v3/getLicense";
+//    static final String XPORTALID = "736430079244616618";
+//    static final String XAPPID = "102808471";
 
 //    static final String URL = "https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense";
 //    static final String AES = "GujM0OeYXMC2IDpVhVoQNK/CUpgOlwypDlICaJ+Uerk=";
@@ -45,10 +49,10 @@ public class RequestDRM {
 
     public static void main(String[] args) throws Exception {
         //receive "payload" from client
-//        String path = "/drmproxy/v2/getLicense";
-        String path = "/drmproxy/v3/getLicense";
-        String xtimestamp = Long.toString(new Date().getTime());
+        String path = "/drmproxy/v2/getLicense";
+//        String path = "/drmproxy/v3/getLicense";
         String begin = Long.toString(new Date().getTime()/1000);
+        String xtimestamp = Long.toString(new Date().getTime());
         String expire = Long.toString(new Date().getTime()/1000 + 86400);
         byte[] key = doCipher(1, CONTENTKEY, Base64.getDecoder().decode(AES), IV);
 
@@ -92,25 +96,21 @@ public class RequestDRM {
             System.out.println(encryptedWord);
             System.out.println(xtimestamp);
 
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(URL))
-//                    .uri(URI.create("https://drmkit.hwcloudtest.cn:8080/drmproxy/v2/getLicense"))
-                    .timeout(Duration.ofMinutes(2))
-                    .header("Content-Type", "application/json")
-//                    .header("x-appId", "")
-                    .header("x-appId", XAPPID)
-                    .header("x-portalId", XPORTALID)
-                    .header("x-timeStamp", xtimestamp)
-                    .header("x-sign", encryptedWord)
-//                    .POST(HttpRequest.BodyPublishers.ofString("{}"))
-                    .POST(HttpRequest.BodyPublishers.ofString(postbody))
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+            OkHttpClient okclient = new OkHttpClient().newBuilder().addInterceptor(logging).build();
+            MediaType mediaType = MediaType.parse("application/json");
+            RequestBody body = RequestBody.create(mediaType, postbody);
+            Request okrequest = new Request.Builder()
+                    .url(URL)
+                    .method("POST", body)
+                    .addHeader("x-appId", XAPPID)
+//                    .addHeader("x-portalId", XPORTALID)
+                    .addHeader("x-timeStamp", xtimestamp)
+                    .addHeader("x-sign", encryptedWord)
+                    .addHeader("Content-Type", "application/json")
                     .build();
-            System.out.println(request.headers());
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.statusCode());
-            System.out.println(response.body());
-            //response.json.body.return to client
+            Response okresponse = okclient.newCall(okrequest).execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
